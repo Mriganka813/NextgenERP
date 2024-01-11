@@ -8,8 +8,7 @@ class chat_bot:
 
     
     def calling_the_model(self): # fun to call the initial model
-        
-        
+                
         prompt = ChatPromptTemplate(
             messages=[
                 SystemMessagePromptTemplate.from_template(
@@ -22,39 +21,40 @@ class chat_bot:
         #this is to initiate memory for the chat bot so it can recall the prior chat history and give answer
         memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
         conversation = LLMChain(llm=llm, prompt=prompt, verbose=True, memory=memory)
+        conversation({"question": "hi"})
+
+        return conversation
         
 
     def model_getcolumns_prompt_initialization(self):
         print("<<<<< call the model successfully >>>")
-        self.calling_the_model()
-        result = conversation({"question": '''you are a good chat model who follows user instruction,
-            if the user gave you instruction such as, "create a columns with name like menu, price,quantity,date" or 
-            "create a table menu, price,quantity,date" or "table create menu, price,quantity,date"
-            then you have to give me the output as such "The column names I have created for the table are:1. tea_menu2. price3. date4. gst " always
-            follow this out " The column names I have created for the table are:1. tea_menu2. price3. date4. gst " , you won't use any word in between like "and",
-            just follow this format "The column names I have created for the table are:1. tea_menu2. price3. date4. gst"'''}, True)
+        self.conversation = self.calling_the_model()
+        result = self.conversation({"question": '''what i want is that whenever the user says, create a table or says creae a columns and then he mentioned the columns names, like 
+        "tea_menu,","price","date","gst". 
+        then you have to give me the user columns names in this format (1. tea_menu 2. price 3. date 4. gst) and nothing else, 
+        no other words or context'''}, True)
 
     def model_getdata_prompt_nitialization(self):
         print(" <<<<< getting model data successfully >>>>> ")
-        result=conversation(
-            {"question": '''now what I want is that whenever the user says add these items to data, for example if user says "add momo to name, 
-            add 50 price, 3 quantity" or  lets say the user say it like that, "add momo to name columns, 
-            add 50 price columns and 3 to quantity columns" then you have to simple give me the name of the columns and there value in dict format, 
-            for example like this {name: "momo" ,price : 50 ,quantity : 3} always follow this format, the user may say in different way,
-            with variety of product no only momo, so you have to understand it, and give me the output in the format I mentioned '''},True)
+        result=self.conversation(
+            {"question": '''# I want is that whenever the user says add these items to data, 
+             for example if user says like "add momo to name, add 50 price, 3 quantity" or "add momo to name columns, 
+             add 50 price columns, and 3 to quantity columns." The desired output is a dictionary in the format: {name: "momo", price: 50, quantity: 3}. 
+             always follow the same format and nothing else, no other words or context'''},True)
  
     def get_user_clms(self): #now after initial prompt we will ask the user to give the prompt 
         self.model_getcolumns_prompt_initialization()
         
         #asking to create a table and then we are formating the table and gettig the columns name which the user mentioned
-        result=conversation(
+        result=self.conversation(
             {"question": input('give me your columns name :')},True) #here i have used input but you can give direct prompt here.
         # Check if 'text' key exists in the result dictionary
         if 'text' in result:
             # Remove newline characters from the 'text' value
             cleaned_paragraph = result['text'].replace('\n', '')
-            patter1= r"(\d+\.+\s+([a-z_]+))"
-            matches = re.findall(patter1, cleaned_paragraph)
+            # patter1= r"(\d+\.+\s+([a-z_]+))"
+            pattern_usr=r"(\d+\.+\s+([a-z_]+))"
+            matches = re.findall(pattern_usr, cleaned_paragraph)
             extracted_column_names = [match[1] for match in matches]
             print(extracted_column_names)
         
@@ -66,9 +66,10 @@ class chat_bot:
         self.model_getcolumns_prompt_initialization() # giving the prompt on how to give the columns and then we are passing the get data prompt
         self.model_getdata_prompt_nitialization() # getting the user data 
         # Check if 'text' key exists in the result dictionary
-        result=conversation({"question": input('give me your data :')},True)
+        result=self.conversation({"question": input('give me your data :')},True)
         if 'text' in result:           
             cleaned_paragraph = result['text'].replace('\n', '')
+            print('this is result :',cleaned_paragraph)
             pattern = r"(\{+([a-z_]+)\:([^\}]+)\})"  # Capture key and value separately   
             # Find all matches
             matches = re.findall(pattern, cleaned_paragraph)
@@ -88,8 +89,10 @@ class chat_bot:
             if ask_user == 'q':
                 pass
             if ask_user == "c":
-                self.create_user_clms() # func to get the user culms
+                self.get_user_clms() # func to get the user culms
             elif ask_user == "a":
                 self.get_user_data() # func get the user data
             else :
                 print('Given wrong input try again.')
+ 
+  
