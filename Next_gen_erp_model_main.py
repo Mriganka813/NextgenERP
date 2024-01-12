@@ -16,8 +16,6 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 import re
 
-llm = ChatOpenAI()
-
 # getting the user input first and then 
 class chat_bot:
     
@@ -28,7 +26,8 @@ class chat_bot:
 
     
     def calling_the_model(self): # fun to call the initial model
-                
+        
+        llm = ChatOpenAI()                
         prompt = ChatPromptTemplate(
             messages=[
                 SystemMessagePromptTemplate.from_template(
