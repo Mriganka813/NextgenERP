@@ -40,7 +40,7 @@ class chat_bot:
         #this is to initiate memory for the chat bot so it can recall the prior chat history and give answer
         memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
         conversation = LLMChain(llm=llm, prompt=prompt, verbose=True, memory=memory)
-        conversation({"question": "hi"})
+        # conversation({"question": "hi"})
 
         return conversation
         
