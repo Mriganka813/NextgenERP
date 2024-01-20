@@ -144,7 +144,7 @@ class MongoDBHandler:
 
           leftover_strings = list(remaining_strings)
 
-          if len(leftover_strings)==0 or len(collection_objects[0]["fields"]):
+          if len(leftover_strings)==0 or len(collection_objects[0]["fields"])==0:
             return self.calculate_sum_of_amount(db, collection_objects[0]["collectionName"])
 
           result_array = []
