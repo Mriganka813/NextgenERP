@@ -138,8 +138,14 @@ class MongoDBHandler:
                               "fields": matching_fields
                           })
                           remaining_strings -= set(matching_fields)
+          
+          if not collection_objects:
+            return self.calculate_sum_of_amount(db, collection_name)
 
           leftover_strings = list(remaining_strings)
+
+          if len(leftover_strings)==0 or len(collection_objects[0]["fields"]):
+            return self.calculate_sum_of_amount(db, collection_objects[0]["collectionName"])
 
           result_array = []
           for item in collection_objects:
@@ -166,6 +172,27 @@ class MongoDBHandler:
           return result_array
 
       except Exception as e:
+          raise e
+
+# Helper function to calculate total amount
+
+    def calculate_sum_of_amount(self, db, collectionName):
+      try:
+          collection = db[collectionName]
+          total_amount = 0
+          for document in collection.find():
+              amount = document.get("amount")
+              if amount is not None:
+                  try:
+                      amount = float(amount)
+                      total_amount += amount
+                  except ValueError:
+                      print(f"Skipping invalid amount in document with _id: {document.get('_id')}")
+
+          return {"total_sum": str(total_amount)}
+
+      except Exception as e:
+          print(f"An error occurred: {str(e)}")
           raise e
 
 
