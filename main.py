@@ -150,16 +150,17 @@ class MongoDBHandler:
 
               fields = item.get('fields', [])
               collection = db[collection_name]
-              all_documents = list(collection.find())
+              query = {field: {"$exists": True} for field in fields}  # Modified this line
 
+              all_documents = list(collection.find(query))
+              
               for x in all_documents:
-                  # Check if the field exists in the document
-                  if all(field in x for field in fields):
-                      # Removing ObjectId from the document
-                      for key, value in x.items():
-                          if isinstance(value, ObjectId):
-                              x[key] = str(value)
+                  for key, value in x.items():
+                      if isinstance(value, ObjectId):
+                          x[key] = str(value)
 
+                  flag = all(x[field] in leftover_strings for field in fields)
+                  if flag:
                       result_array.append(x)
 
           return result_array
